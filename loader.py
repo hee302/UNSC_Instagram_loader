@@ -17,10 +17,8 @@ print("=" * 40)
 print("   인스타그램 다 들어가보기 귀찮은 운영진을 위한 인스타그램 게시글 수 추출기")
 print("=" * 40)
 
-# 1. 사용자로부터 설정값 입력받기
 target_file = input("1. 엑셀 파일명을 입력하세요 (예: instagram.xlsx): ").strip()
 
-# 파일 존재 여부 확인
 if not os.path.exists(target_file):
     print(f"\n[오류] '{target_file}' 파일을 찾을 수 없습니다.")
     print("exe 파일과 같은 폴더에 엑셀 파일이 있는지 확인해주세요.")
@@ -44,16 +42,13 @@ print("로그인을 하지 않으므로 천천히 진행됩니다. (잠시 대�
 print("=" * 40)
 time.sleep(2)
 
-# 2. 엑셀 로드 및 로더 초기화
 wb = openpyxl.load_workbook(target_file)
 ws = wb.active
 L = instaloader.Instaloader()
 
 error_count = 0
 
-# 3. 반복 작업 시작
 for row in range(start_row, end_row + 1):
-    # 사용자가 입력한 열(read_col)과 행(row)을 조합 (예: C + 5 -> C5)
     cell_id = ws[f'{read_col}{row}'].value
     
     if cell_id is None:
@@ -66,13 +61,11 @@ for row in range(start_row, end_row + 1):
         profile = instaloader.Profile.from_username(L.context, username)
         count = profile.mediacount
         
-        # 사용자가 입력한 결과 열(write_col)에 저장
         ws[f'{write_col}{row}'].value = count
         print(f"[행 {row}] {username} : {count}개 완료")
         
-        error_count = 0 # 성공 시 에러 카운트 초기화
+        error_count = 0
 
-        # 중간 저장 (파일명 앞에 'result_'를 붙여서 저장)
         if row % 5 == 0:
             wb.save(f'result_{target_file}')
             print("   >> 중간 저장 완료")
@@ -86,12 +79,11 @@ for row in range(start_row, end_row + 1):
             print("\n!!! 연속 3회 에러. 차단 방지를 위해 여기서 멈춥니다. !!!")
             break
 
-    # 랜덤 대기 (15~30초)
+    # 랜덤 대기 안하면 인스타그램에서 블록먹음.. 만약 차단당하면 대기시간 늘려야함 ㅜ
     wait_time = random.uniform(15, 30)
     print(f"   ({int(wait_time)}초 대기 중...)")
     time.sleep(wait_time)
 
-# 4. 최종 저장
 output_filename = f'result_{target_file}'
 wb.save(output_filename)
 
